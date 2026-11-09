@@ -113,7 +113,6 @@ const updateData = (duration: number = 5000) => {
     const res = await execute();
     if (res!.code === 200) {
       setOption(res!.data);
-      // console.log("更新数据");
     }
   }, duration);
 };

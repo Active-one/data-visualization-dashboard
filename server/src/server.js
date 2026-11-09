@@ -1,9 +1,13 @@
 const express = require("express");
+const path = require("path");
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 
 // 创建express应用
 const app = express();
+
+app.use(express.static(path.join(__dirname, "../dist")));
+
 const httpServer = createServer(app);
 const port = 3000;
 
@@ -48,15 +52,24 @@ io.on("connection", (socket) => {
 
   // 销售统计数据
   socket.emit("salesData", generateSalesData());
-  // socket.emit("trendData", generateTrendData());
-  const interval = setInterval(() => {
+  socket.emit("trendData", generateTrendData());
+  const intervalOne = setInterval(() => {
     socket.emit("salesData", generateSalesData());
   }, 2000);
+  const intervalTwo = setInterval(() => {
+    socket.emit("trendData", generateTrendData());
+  }, 5000);
 
   socket.on("disconnect", () => {
     console.log("客户端已经断开：" + socket.id);
-    clearInterval(interval);
+    clearInterval(intervalOne);
+    clearInterval(intervalTwo);
   });
+});
+
+app.get("*", (req, res, next) => {
+  if (req.url.startsWith("/socket.io")) return nexts();
+  res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
 httpServer.listen(port, () => {

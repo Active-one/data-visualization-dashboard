@@ -10,14 +10,16 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 // 【原】全量引入（打包整个 ECharts，体积大）
 // import * as echarts from "echarts";
 import echarts from "@/utils/echarts";
 import ChartTitle from "@/components/ChartTitle.vue";
-import { useAsync } from "@/hooks/useAsync";
 import type { TrendType } from "@/types";
-import { getTrendList } from "@/api";
+import { useWebsocket } from "@/hooks/useWebsocket";
+const { subscribe } = useWebsocket(
+  import.meta.env.PROD ? window.location.origin : "http://localhost:3000",
+);
 
 // 渐变颜色值数组
 const colorArr = [
@@ -27,54 +29,17 @@ const colorArr = [
   "rgba(254, 33, 30, 0.5)",
   "rgba(250, 105, 0, 0.5)",
 ];
+
 const option = ref({});
 
-useAsync(getTrendList, {
-  onSuccess(res) {
-    if (res.code === 200) {
-      setOption(res.data);
-    }
-  },
-  immediate: true,
-});
-
-const getSeries = (data: TrendType[]) => {
-  return data.map((item, index) => {
-    return {
-      type: "line",
-      name: item.name,
-      data: item.value,
-      lineStyle: {
-        width: 4,
-      },
-      itemStyle: {
-        borderWidth: 5,
-      },
-      smooth: true,
-      symbolSize: 0,
-      areaStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          {
-            offset: 0,
-            color: colorArr[index],
-          },
-          {
-            offset: 1,
-            color: colorArr[index].replace("0.5", "0"),
-          },
-        ]),
-      },
-    };
-  });
-};
-// 设置配置
-const setOption = (data: TrendType[]) => {
+// 初始化设置option
+const initSetOption = () => {
   option.value = {
     legend: {
       top: "8%",
       left: 20,
       icon: "circle",
-      data: data.map((item) => item.name),
+      data: [],
       textStyle: {
         color: "#aaa",
       },
@@ -111,9 +76,57 @@ const setOption = (data: TrendType[]) => {
       type: "value",
       axisLabel: { color: "#777" },
     },
+    series: [],
+  };
+};
+
+// 更新设置option
+const updateSetOption = (data: TrendType[]) => {
+  console.log(data);
+
+  option.value = {
+    legend: {
+      data: data.map((item) => item.name),
+    },
     series: getSeries(data),
   };
 };
+
+const getSeries = (data: TrendType[]) => {
+  return data.map((item, index) => {
+    return {
+      type: "line",
+      name: item.name,
+      data: item.value,
+      lineStyle: {
+        width: 4,
+      },
+      itemStyle: {
+        borderWidth: 5,
+      },
+      smooth: true,
+      symbolSize: 0,
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          {
+            offset: 0,
+            color: colorArr[index],
+          },
+          {
+            offset: 1,
+            color: colorArr[index].replace("0.5", "0"),
+          },
+        ]),
+      },
+    };
+  });
+};
+
+subscribe("trendData", updateSetOption);
+
+onMounted(() => {
+  initSetOption();
+});
 </script>
 
 <style lang="scss" scoped>

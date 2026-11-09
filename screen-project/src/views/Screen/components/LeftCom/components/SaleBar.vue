@@ -16,10 +16,10 @@ import { onMounted, ref } from "vue";
 import echarts from "@/utils/echarts";
 import ChartTitle from "@/components/ChartTitle.vue";
 import type { SalesType } from "@/types";
-// import { useWebsocket } from "@/hooks/useWebsocket";
-// const { subscribe } = useWebsocket("http://localhost:3000");
-import { useAsync } from "@/hooks/useAsync";
-import { getSalesList } from "@/api";
+import { useWebsocket } from "@/hooks/useWebsocket";
+const { subscribe } = useWebsocket(
+  import.meta.env.PROD ? window.location.origin : "http://localhost:3000",
+);
 
 const option = ref({});
 
@@ -104,15 +104,7 @@ const updateSetOption = (data: SalesType[]) => {
   };
 };
 
-// subscribe("salesData", updateSetOption);
-useAsync(getSalesList, {
-  onSuccess(res) {
-    if (res.code === 200) {
-      updateSetOption(res.data);
-    }
-  },
-  immediate: true,
-});
+subscribe("salesData", updateSetOption);
 
 onMounted(() => {
   initSetOption();
