@@ -68,7 +68,7 @@ io.on("connection", (socket) => {
 });
 
 app.get("*", (req, res, next) => {
-  if (req.url.startsWith("/socket.io")) return nexts();
+  if (req.url.startsWith("/socket.io")) return next();
   res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
