@@ -16,10 +16,12 @@ import { onMounted, ref } from "vue";
 import echarts from "@/utils/echarts";
 import ChartTitle from "@/components/ChartTitle.vue";
 import type { SalesType } from "@/types";
-import { useWebsocket } from "@/hooks/useWebsocket";
+// import { useWebsocket } from "@/hooks/useWebsocket";
+// const { subscribe } = useWebsocket("http://localhost:3000");
+import { useAsync } from "@/hooks/useAsync";
+import { getSalesList } from "@/api";
 
 const option = ref({});
-const { subscribe } = useWebsocket("http://localhost:3000");
 
 // 初始化设置option
 const initSetOption = () => {
@@ -102,7 +104,15 @@ const updateSetOption = (data: SalesType[]) => {
   };
 };
 
-subscribe("salesData", updateSetOption);
+// subscribe("salesData", updateSetOption);
+useAsync(getSalesList, {
+  onSuccess(res) {
+    if (res.code === 200) {
+      updateSetOption(res.data);
+    }
+  },
+  immediate: true,
+});
 
 onMounted(() => {
   initSetOption();

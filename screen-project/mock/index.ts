@@ -1,4 +1,5 @@
-import { MockMethod } from "vite-plugin-mock";
+// import { MockMethod } from "vite-plugin-mock";
+import type { MockMethod } from "vite-plugin-mock";
 import Mock from "mockjs";
 
 export default [

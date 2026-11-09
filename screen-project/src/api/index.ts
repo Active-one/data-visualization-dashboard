@@ -8,8 +8,8 @@ import type {
 import request from "@/utils/request.ts";
 
 // 获取销售列表
-// 【原】无任何调用方（销售数据走 Socket.IO 实时推送），先注释保留
-// export const getSalesList = () => request.get<SalesType[]>("/sales");
+// 【原】无任何调用方（销售数据走 Socket.IO 实时推送）
+export const getSalesList = () => request.get<SalesType[]>("/sales");
 
 // 获取地区销量趋势列表
 export const getTrendList = () => request.get<TrendType[]>("/trend");
